@@ -4,16 +4,20 @@ import Head from 'next/head';
 import styles from '../styles/Home.module.css';
 // Firebase deps
 import firebase_app from '../firebase/config';
-import {getAuth} from "firebase/auth";
+import { getAuth } from "firebase/auth";
 import logout from "@/firebase/auth/signout";
+import { signInWithGoogle } from "@/firebase/auth/signin";
 // Components
 import { GoogleButton, Channel, Loader } from '../components';
 // Icons
 import { Burn, MoonIcon, SunIcon } from '../components';
 // Theme
 import { useTheme } from 'next-themes';
-import {useAuthContext} from "@/context/AuthContext";
-import {useRouter} from "next/navigation";
+import { useAuthContext } from "@/context/AuthContext";
+import { useRouter } from "next/navigation";
+import signIn from "@/firebase/auth/signin";
+import {toast} from "react-toastify";
+import LoginForm from "@/components/LoginForm";
 
 const auth = getAuth(firebase_app);
 
@@ -39,17 +43,16 @@ export default function Home() {
 
     const ThemeIcon = mounted && theme === 'dark' ? SunIcon : MoonIcon;
 
-    const signInWithGoogle = async () => {
-        // Retrieve Google provider object
-        // const provider = new firebase.auth.GoogleAuthProvider();
-        // // Set language to the default browser preference
-        // auth.useDeviceLanguage();
-        // // Start sign in process
-        // try {
-        //     await auth.signInWithPopup(provider);
-        // } catch (error) {
-        //     console.error(error.message);
-        // }
+    const loginWithGoogle = async () => {
+        const { result, error } = await signInWithGoogle();
+        if (error) {
+            console.log(error);
+            toast.error(error, {
+                position: toast.POSITION.TOP_RIGHT
+            });
+        }
+        // else successful
+        console.log(result);
     };
 
     const signOut = async () => {
@@ -60,13 +63,6 @@ export default function Home() {
     };
 
     const renderContent = () => {
-        // if (initializing) {
-        //     return (
-        //         <div className='flex items-center justify-center h-full'>
-        //             <Loader />
-        //         </div>
-        //     );
-        // }
 
         if (user) return <Channel user={user} />;
 
@@ -80,7 +76,12 @@ export default function Home() {
                     <p className='mb-8 text-lg text-center text-gray-500'>
                         The easiest way to chat with people all around the world.
                     </p>
-                    <GoogleButton onClick={signInWithGoogle}>
+                    <div className="mb-8 sm:mx-auto sm:w-full sm:max-w-sm">
+                        <div className="bg-white py-4 px-4">
+                            <LoginForm/>
+                        </div>
+                    </div>
+                    <GoogleButton onClick={loginWithGoogle}>
                         Sign in with Google
                     </GoogleButton>
                 </div>
