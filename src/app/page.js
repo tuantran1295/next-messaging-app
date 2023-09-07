@@ -18,6 +18,7 @@ import { useRouter } from "next/navigation";
 import signIn from "@/firebase/auth/signin";
 import {toast} from "react-toastify";
 import LoginForm from "@/components/LoginForm";
+import NavBar from "@/components/NavBar";
 
 const auth = getAuth(firebase_app);
 
@@ -25,23 +26,9 @@ export default function Home() {
     const { user } = useAuthContext();
     const router = useRouter();
     const [mounted, setMounted] = useState(false);
-    const { theme, setTheme } = useTheme();
 
     // When mounted on client, now we can show the UI
     useEffect(() => setMounted(true), []);
-
-    const switchTheme = () => {
-        if (mounted) {
-            setTheme(theme === 'light' ? 'dark' : 'light');
-        }
-    };
-
-    const brandLogo =
-        mounted && theme === 'dark'
-            ? '/assets/Gray_logo.svg'
-            : '/assets/KaiOS_logo.svg';
-
-    const ThemeIcon = mounted && theme === 'dark' ? SunIcon : MoonIcon;
 
     const loginWithGoogle = async () => {
         const { result, error } = await signInWithGoogle();
@@ -53,13 +40,6 @@ export default function Home() {
         }
         // else successful
         console.log(result);
-    };
-
-    const signOut = async () => {
-        const {error} = logout();
-        if (error) {
-            console.error(error);
-        }
     };
 
     const renderContent = () => {
@@ -94,24 +74,7 @@ export default function Home() {
             <Head>
                 <title>Dreamer FireChat</title>
             </Head>
-            <header
-                className={`flex-shrink-0 flex items-center justify-between px-4 sm:px-8 shadow-md ${styles.header_space}`}
-            >
-                <a href=''>
-                    <img src={brandLogo} alt='Dreamer_logo' width={150} />
-                </a>
-                <div className='flex items-center'>
-                    {user ? (
-                        <button
-                            onClick={signOut}
-                            className='uppercase text-sm font-medium text-KaiBrand-500 hover:text-white tracking-wide hover:bg-KaiBrand-500 bg-transparent rounded py-2 px-4 mr-4 focus:outline-none focus:ring focus:ring-KaiBrand-500 focus:ring-opacity-75 transition-all'
-                        >
-                            Sign out
-                        </button>
-                    ) : null}
-                    <ThemeIcon className='h-8 w-8 cursor-pointer' onClick={switchTheme} />
-                </div>
-            </header>
+            <NavBar user={user}/>
             <main className={`flex-1 ${styles.main_space}`}>{renderContent()}</main>
         </div>
     )
