@@ -1,6 +1,5 @@
 import firebase_app from "../config";
 import { getAuth, signOut } from "firebase/auth";
-import {useRouter} from "next/navigation";
 
 const auth = getAuth(firebase_app);
 
@@ -9,7 +8,7 @@ export default async function logout() {
         error = null;
 
         result = await signOut(auth).then(function () {
-
+            console.log("Signed out successfully");
         }).catch(e =>  {
             error = e;
         });
