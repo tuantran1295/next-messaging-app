@@ -5,17 +5,14 @@ import styles from '../styles/Home.module.css';
 // Firebase deps
 import firebase_app from '../firebase/config';
 import { getAuth } from "firebase/auth";
-import logout from "@/firebase/auth/signout";
 import { signInWithGoogle } from "@/firebase/auth/signin";
 // Components
 import { GoogleButton, Channel, Loader } from '../components';
 // Icons
 import { Burn, MoonIcon, SunIcon } from '../components';
-// Theme
-import { useTheme } from 'next-themes';
+
 import { useAuthContext } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
-import signIn from "@/firebase/auth/signin";
 import {toast} from "react-toastify";
 import LoginForm from "@/components/LoginForm";
 import NavBar from "@/components/NavBar";
@@ -27,7 +24,6 @@ export default function Home() {
     const router = useRouter();
     const [mounted, setMounted] = useState(false);
 
-    // When mounted on client, now we can show the UI
     useEffect(() => setMounted(true), []);
 
     const loginWithGoogle = async () => {

@@ -23,7 +23,6 @@ function Message({
   photoURL = '',
 }) {
   if (!text) return null;
-  console.log(photoURL);
   return (
     <div className='px-4 py-4 rounded-md hover:bg-gray-50 dark:hover:bg-coolDark-600 overflow-hidden flex items-start'>
       {photoURL ? (
