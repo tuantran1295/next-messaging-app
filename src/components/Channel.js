@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import firebase from '../firebase/config';
 // Components
 import { Message } from '../components';
-import {getFirestore, collection, query, orderBy, limit, onSnapshot, FieldValue} from "firebase/firestore";
+import {getFirestore, collection, query, orderBy, limit, onSnapshot, serverTimestamp, addDoc} from "firebase/firestore";
 import firebase_app from "../firebase/config";
 
 function Channel({ user = null }) {
@@ -50,17 +50,19 @@ function Channel({ user = null }) {
     const trimmedMessage = newMessage.trim();
     if (db) {
       // Add new message in Firestore
-      messagesRef.add({
+      addDoc(messagesRef, {
         text: trimmedMessage,
-        createdAt: FieldValue(db).serverTimestamp(),
+        createdAt: serverTimestamp(),
         uid,
         displayName,
         photoURL,
+      }).then(r => {
+        console.log(r);
+        // Clear input field
+        setNewMessage('');
+        // Scroll down to the bottom of the list
+        bottomListRef.current?.scrollIntoView({ behavior: 'smooth' });
       });
-      // Clear input field
-      setNewMessage('');
-      // Scroll down to the bottom of the list
-      bottomListRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
   };
 
@@ -71,7 +73,7 @@ function Channel({ user = null }) {
           <div className='border-b dark:border-gray-600 border-gray-200 py-8 mb-4'>
             <div className='font-bold text-3xl text-center'>
               <p className='mb-1'>Welcome to</p>
-              <p className='mb-3'>KaiOS FireChat</p>
+              <p className='mb-3'>Dreamer FireChat</p>
             </div>
             <p className='text-gray-400 text-center'>
               This is the beginning of this chat.
