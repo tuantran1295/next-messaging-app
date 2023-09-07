@@ -1,11 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 // Firebase deps
-import firebase from '../firebase/config';
+import firebase_app from "../firebase/config";
 // Components
 import { Message } from '../components';
 import {getFirestore, collection, query, orderBy, limit, onSnapshot, serverTimestamp, addDoc} from "firebase/firestore";
-import firebase_app from "../firebase/config";
 
 function Channel({ user = null }) {
   const db = getFirestore(firebase_app);
@@ -57,7 +56,7 @@ function Channel({ user = null }) {
         displayName,
         photoURL,
       }).then(r => {
-        console.log(r);
+        // console.log(r);
         // Clear input field
         setNewMessage('');
         // Scroll down to the bottom of the list

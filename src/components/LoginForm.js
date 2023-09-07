@@ -14,7 +14,7 @@ function LoginForm() {
 
         if (error) {
             console.log(error);
-            toast.error(error, {
+            toast.error(JSON.stringify(error), {
                 position: toast.POSITION.TOP_RIGHT
             });
             return;

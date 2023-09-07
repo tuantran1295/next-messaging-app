@@ -1,9 +1,9 @@
 'use client'
 import './globals.css';
+import 'react-toastify/dist/ReactToastify.css';
 import { AuthContextProvider } from "@/context/AuthContext";
 import { NextThemeProvider } from "@/context/ThemeContext"
-import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import ToastProvider from "@/context/ToastProvider";
 
 export default function RootLayout({ children }) {
   return (
@@ -16,10 +16,11 @@ export default function RootLayout({ children }) {
         <body>
           <AuthContextProvider>
               <NextThemeProvider>
-                  {children}
+                  <ToastProvider>
+                      {children}
+                  </ToastProvider>
               </NextThemeProvider>
           </AuthContextProvider>
-          <ToastContainer/>
         </body>
       </html>
   )

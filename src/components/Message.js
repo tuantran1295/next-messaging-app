@@ -23,7 +23,7 @@ function Message({
   photoURL = '',
 }) {
   if (!text) return null;
-
+  console.log(photoURL);
   return (
     <div className='px-4 py-4 rounded-md hover:bg-gray-50 dark:hover:bg-coolDark-600 overflow-hidden flex items-start'>
       {photoURL ? (
@@ -34,12 +34,18 @@ function Message({
           width={45}
           height={45}
         />
-      ) : null}
+      ) : <Image
+          src='/assets/avatar-placeholder.jpg'
+          alt='Avatar'
+          className='rounded-full'
+          width={45}
+          height={45}
+      />}
       <div className='ml-4'>
         <div className='flex items-center mb-1'>
           {displayName ? (
             <p className='mr-2 text-KaiBrand-500'>{displayName}</p>
-          ) : null}
+          ) : <p className='mr-2 text-KaiBrand-500'>Anonymous</p>}
           {createdAt?.seconds ? (
             <span className='text-gray-500 text-xs'>
               {formatDate(new Date(createdAt.seconds * 1000))}
