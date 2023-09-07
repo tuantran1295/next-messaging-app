@@ -15,6 +15,6 @@ export default function Home() {
         }
     }
     return (
-        <div>The quick brown fox jumps over lazy dogs</div>
+        <div>Home page</div>
     )
 }
