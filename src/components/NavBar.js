@@ -27,8 +27,8 @@ function NavBar({user = null}) {
 
     const brandLogo =
         mounted && theme === 'dark'
-            ? '/assets/Gray_logo.svg'
-            : '/assets/KaiOS_logo.svg';
+            ? '/assets/logo-dark.png'
+            : '/assets/logo-bright.png';
 
     const ThemeIcon = mounted && theme === 'dark' ? SunIcon : MoonIcon;
 

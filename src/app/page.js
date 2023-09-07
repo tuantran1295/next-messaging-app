@@ -56,7 +56,7 @@ export default function Home() {
                     <p className='mb-6 text-lg text-center text-gray-500'>
                         The easiest way to chat with people all around the world.
                     </p>
-                    <div className="mb-8 sm:mx-auto sm:w-full sm:max-w-sm">
+                    <div className="mb-6 sm:mx-auto sm:w-full sm:max-w-sm">
                         <div className="bg-white py-4 px-4">
                             <LoginForm/>
                         </div>
