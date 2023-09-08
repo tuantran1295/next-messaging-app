@@ -16,6 +16,7 @@ import { useRouter } from "next/navigation";
 import {toast} from "react-toastify";
 import LoginForm from "@/components/LoginForm";
 import NavBar from "@/components/NavBar";
+import Notifications from "@/components/Notifications";
 
 const auth = getAuth(firebase_app);
 
@@ -40,7 +41,12 @@ export default function Home() {
 
     const renderContent = () => {
 
-        if (user) return <Channel user={user} />;
+        if (user) return (
+            <>
+                <Channel user={user} />
+                <Notifications/>
+            </>
+        );
 
         return (
             <div className='flex items-center justify-center shadow-md h-full'>

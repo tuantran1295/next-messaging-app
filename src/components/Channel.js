@@ -20,9 +20,53 @@ function Channel({user = null}) {
 
     const {uid, displayName, photoURL} = user;
 
-    // useEffect(() => {
-    //     inputRef.current.focus();
-    // }, []);
+    useEffect(() => {
+        // inputRef.current.focus();
+        setInterval(()=> {
+            // const PushNotifications = require('@pusher/push-notifications-server');
+            //
+            // let pushNotifications = new PushNotifications({
+            //     instanceId: '0e7852ec-1047-4243-9943-c4c24a1b1fef',
+            //     secretKey: 'FCD1E95A58F6B7731309F6BEADD0E365466892F6716363B677CDE74D68C74F2D'
+            // });
+            // pushNotifications.publishToInterests(['hello'], {
+            //     web: {
+            //         notification: {
+            //             title: "Hello",
+            //             body: "Hello, world!",
+            //             deep_link: "https://www.pusher.com",
+            //         },
+            //     },
+            // }).then((publishResponse) => {
+            //     console.log('Just published:', publishResponse.publishId);
+            // }).catch((error) => {
+            //     console.log('Error:', error);
+            // });
+
+            const Pusher = require("pusher");
+
+            const pusher = new Pusher({
+                appId: "1666936",
+                key: "7665b4233dfd79c2f2ed",
+                secret: "2d5424f2ad9a8f4d3875",
+                cluster: "ap1",
+                useTLS: true,
+                auth: {
+                    headers: {
+                        Authorization: 'Bearer ' + 'FCD1E95A58F6B7731309F6BEADD0E365466892F6716363B677CDE74D68C74F2D',
+                        "Access-Control-Allow-Origin" : "*",
+                        "Access-Control-Allow-Methods": '*',
+                        "Access-Control-Allow-Credentials": true,
+                        "Access-Control-Allow-Headers": "X-Requested-With,Content-Type,X-Token-Auth,Authorization"
+                    }
+                }
+            });
+
+            pusher.trigger("chat-channel", "mentioned", {
+                message: "hello world"
+            });
+        }, 3000)
+    }, []);
 
     useEffect(() => {
         // Subscribe to query with onSnapshot
