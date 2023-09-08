@@ -1,9 +1,9 @@
 import React, {useState, useEffect, useRef} from 'react';
 import PropTypes from 'prop-types';
 // Firebase deps
-import firebase_app from "../firebase/config";
+import firebase_app from "../../firebase/config";
 // Components
-import {Message} from '../components';
+import {Message} from '../index';
 import {getFirestore, collection, query, orderBy, limit, onSnapshot, serverTimestamp, addDoc} from "firebase/firestore";
 import MentionChatInput from "@/components/mention/MentionChatInput";
 
@@ -22,7 +22,7 @@ function Channel({user = null}) {
 
     useEffect(() => {
         // inputRef.current.focus();
-        setInterval(()=> {
+        setTimeout(()=> {
             // const PushNotifications = require('@pusher/push-notifications-server');
             //
             // let pushNotifications = new PushNotifications({
