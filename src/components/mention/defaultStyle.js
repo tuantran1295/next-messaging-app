@@ -45,10 +45,14 @@ export default {
       backgroundColor: "white",
       border: "1px solid rgba(0,0,0,0.15)",
       fontSize: 14,
+      position: "absolute",
+      bottom: "10px",
+      width: "170px"
     },
     item: {
       padding: "5px 15px",
       borderBottom: "1px solid rgba(0,0,0,0.15)",
+      minWidth: "170px",
       "&focused": {
         backgroundColor: "#cee4e5",
       },

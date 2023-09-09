@@ -1,9 +1,12 @@
-import {useState} from "react";
+'use client'
+import {useEffect, useState} from "react";
 import {Mention, MentionsInput} from "react-mentions";
 import defaultStyle from "./defaultStyle";
 import defaultMentionStyle from "./defaultMentionStyle";
+import {toast} from "react-toastify";
+import {getAllUser} from "@/firebase/firestore/getData";
 
-const users = [
+var users = [
     {
         id: "jack",
         display: "Jack",
@@ -14,18 +17,29 @@ const users = [
     },
 ];
 
-const fetchUsers = (query, callback) => {
-    if (!query) return;
-
-    setTimeout(() => {
-        const filteredUsers = users.filter((user) =>
-            user.display.toLowerCase().includes(query)
-        );
-        callback(filteredUsers);
-    }, 2000);
-};
-
 const MentionChatInput = ({value, onChange}) => {
+    useEffect(() => {
+        fetchAllUsers();
+    }, [])
+
+    const fetchAllUsers = async () => {
+        const { result, error } = await getAllUser();
+
+        if (error) {
+            console.log(error);
+            toast.error(JSON.stringify(error), {
+                position: toast.POSITION.TOP_RIGHT
+            });
+            return;
+        }
+
+        // else successful
+        console.log(result);
+        window.sessionStorage.setItem('allUser', JSON.stringify(result));
+        users = result;
+        return result;
+    };
+
     const onAdd = (e) => {
         console.log("onAdd", e);
     };
