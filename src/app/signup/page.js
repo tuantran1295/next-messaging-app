@@ -35,7 +35,7 @@ function Page() {
             <NavBar/>
             <div className="h-screen flex flex-col justify-center items-center py-12 sm:px-6 lg:px-8">
                 <div className="sm:mx-auto sm:w-full sm:max-w-md">
-                    <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+                    <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
                         Sign Up
                     </h2>
                 </div>
@@ -46,7 +46,7 @@ function Page() {
                             <div>
                                 <label
                                     htmlFor="email"
-                                    className="block text-sm font-medium text-gray-700"
+                                    className="block text-sm font-medium text-gray-700 dark:text-white"
                                 >
                                     Email address
                                 </label>
@@ -66,7 +66,7 @@ function Page() {
                             <div>
                                 <label
                                     htmlFor="password"
-                                    className="block text-sm font-medium text-gray-700"
+                                    className="block text-sm font-medium text-gray-700 dark:text-white"
                                 >
                                     Password
                                 </label>
@@ -86,7 +86,7 @@ function Page() {
                             <div>
                                 <label
                                     htmlFor="display-name"
-                                    className="block text-sm font-medium text-gray-700"
+                                    className="block text-sm font-medium text-gray-700 dark:text-white"
                                 >
                                     Display name
                                 </label>
@@ -104,7 +104,7 @@ function Page() {
                             <div>
                                 <label
                                     htmlFor="avatar"
-                                    className="block text-sm font-medium text-gray-700"
+                                    className="block text-sm font-medium text-gray-700 dark:text-white"
                                 >
                                     Avatar
                                 </label>

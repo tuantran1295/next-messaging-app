@@ -7,12 +7,11 @@ import firebase_app from '../firebase/config';
 import { getAuth } from "firebase/auth";
 import { signInWithGoogle } from "@/firebase/auth/signin";
 // Components
-import { GoogleButton, Channel, Loader } from '../components';
+import { GoogleButton, Channel } from '../components';
 // Icons
-import { Burn, MoonIcon, SunIcon } from '../components';
+import { Burn } from '../components';
 
 import { useAuthContext } from "@/context/AuthContext";
-import { useRouter } from "next/navigation";
 import {toast} from "react-toastify";
 import LoginForm from "@/components/LoginForm";
 import NavBar from "@/components/NavBar";
@@ -21,10 +20,27 @@ const auth = getAuth(firebase_app);
 
 export default function Home() {
     const { user } = useAuthContext();
-    const router = useRouter();
     const [mounted, setMounted] = useState(false);
 
     useEffect(() => setMounted(true), []);
+
+    useEffect(() => {
+        testNotification();
+    }, [])
+
+    function testNotification() {
+        if (!("Notification" in window)) {
+            alert("This browser does not support desktop notification");
+        } else if (Notification.permission === "granted") {
+            const notification = new Notification("Test notification");
+        } else if (Notification.permission !== "denied") {
+            Notification.requestPermission().then((permission) => {
+                if (permission === "granted") {
+                    const notification = new Notification("Test notification");
+                }
+            });
+        }
+    }
 
     const loginWithGoogle = async () => {
         const { result, error } = await signInWithGoogle();
@@ -57,7 +73,7 @@ export default function Home() {
                         The easiest way to chat with people all around the world.
                     </p>
                     <div className="mb-6 sm:mx-auto sm:w-full sm:max-w-sm">
-                        <div className="bg-white py-4 px-4">
+                        <div className="py-4 px-4">
                             <LoginForm/>
                         </div>
                     </div>

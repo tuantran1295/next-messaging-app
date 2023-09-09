@@ -52,9 +52,10 @@ function NotificationDropdown({}) {
     }
 
     const displayNotificationToast = (message) => {
-        toast.info(JSON.stringify(message), {
-            position: toast.POSITION.TOP_RIGHT
-        });
+        const notification = new Notification(message);
+        // toast.info(JSON.stringify(message), {
+        //     position: toast.POSITION.TOP_RIGHT
+        // });
     }
 
     const getCurrentUserNotiList = async () => {

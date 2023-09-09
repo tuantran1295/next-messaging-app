@@ -29,7 +29,7 @@ function LoginForm() {
             <div>
                 <label
                     htmlFor="email"
-                    className="block text-sm font-medium text-gray-700"
+                    className="block text-sm font-medium text-gray-700 dark:text-white"
                 >
                     Email address
                 </label>
@@ -49,7 +49,7 @@ function LoginForm() {
             <div>
                 <label
                     htmlFor="password"
-                    className="block text-sm font-medium text-gray-700"
+                    className="block text-sm font-medium text-gray-700 dark:text-white"
                 >
                     Password
                 </label>
@@ -76,7 +76,7 @@ function LoginForm() {
                     />
                     <label
                         htmlFor="remember-me"
-                        className="ml-2 block text-sm text-gray-900"
+                        className="ml-2 block text-sm text-gray-900 dark:text-white"
                     >
                         Remember me
                     </label>
