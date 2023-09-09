@@ -33,7 +33,7 @@ export async function getAllUser() {
             if (messageList[i].displayName === null) {
                 messageList[i].displayName = 'Anonymous';
             }
-            messageList[i].id = messageList[i].uid;
+            messageList[i].id = i;
             messageList[i].display = messageList[i].displayName;
         }
         result = removeDuplicate(messageList);

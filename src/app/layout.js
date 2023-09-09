@@ -4,7 +4,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { AuthContextProvider } from "@/context/AuthContext";
 import { NextThemeProvider } from "@/context/ThemeContext"
 import ToastProvider from "@/context/ToastProvider";
-import {NotificationContext} from "@/context/NotificationContext";
+import {NotificationProvider} from "@/context/NotificationContext";
 
 export default function RootLayout({ children }) {
   return (
@@ -18,11 +18,11 @@ export default function RootLayout({ children }) {
         <body>
           <AuthContextProvider>
               <NextThemeProvider>
-                  <NotificationContext>
+                  <NotificationProvider>
                       <ToastProvider>
                           {children}
                       </ToastProvider>
-                  </NotificationContext>
+                  </NotificationProvider>
               </NextThemeProvider>
           </AuthContextProvider>
         </body>

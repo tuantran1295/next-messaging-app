@@ -19,8 +19,10 @@ export const AuthContextProvider = ({
         const unsubscribe = onAuthStateChanged(auth, (user) => {
             if (user) {
                 setUser(user);
+                localStorage.setItem("current_user", JSON.stringify(user));
             } else {
                 setUser(null);
+                localStorage.setItem("current_user", '');
             }
             setLoading(false);
 
