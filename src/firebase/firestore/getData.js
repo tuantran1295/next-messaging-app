@@ -33,7 +33,7 @@ export async function getAllUser() {
             if (messageList[i].displayName === null) {
                 messageList[i].displayName = 'Anonymous';
             }
-            messageList[i].id = i;
+            messageList[i].id = messageList[i].uid;
             messageList[i].display = messageList[i].displayName;
         }
         result = removeDuplicate(messageList);
@@ -45,10 +45,35 @@ export async function getAllUser() {
 }
 
 function removeDuplicate(array) {
-    return array.filter((value, index) => {
-        const _value = JSON.stringify(value);
-        return index === array.findIndex(obj => {
-            return JSON.stringify(obj) === _value;
-        });
-    });
+    const nonDuplicate = []
+    for (let i = 0; i <array.length; i++) {
+        const isExist = nonDuplicate.filter(u => u.uid === array[i].uid)[0];
+        if (!isExist) {
+            nonDuplicate.push(array[i])
+        }
+    }
+    return nonDuplicate;
+}
+
+export async function getCurrentUserNotification(currentUser) {
+    let error = null;
+    let notiList = [];
+    let result = [];
+    try {
+        const snapshot = await getDocs(collection(db, 'notification'));
+        notiList = snapshot.docs.map(doc => doc.data());
+    }catch (e) {
+        error = e
+    }
+
+    for (let i = 0; i < notiList.length; i++) {
+        const receivers = notiList[i].receiver;
+        if (receivers && receivers.length > 0)
+        for (let j = 0; j < receivers.length; j++) {
+            if (currentUser.uid === receivers[j].uid) {
+                result.push(notiList[i]);
+            }
+        }
+    }
+    return { result, error }
 }

@@ -80,7 +80,7 @@ function Channel({user = null}) {
             text: `${displayName} has mentioned you in a message.`,
             createdAt: serverTimestamp(),
             sender: {id: user.uid, name: user.displayName, imgURL: user.photoURL},
-            receiver: mentionedList,
+            receiver: mentionedList.current,
             isRead: false,
             isClicked: false
         }).then(r => {
@@ -99,8 +99,11 @@ function Channel({user = null}) {
     const triggerNotification = () => {
         pusher.trigger("chat-channel", "mentioned", {
             message: `${user.displayName} has mentioned you in a message.`,
-            // sender: {id: user.uid, name: user.displayName, imgURL: user.photoURL},
-            // receiver: mentionedList
+            sender: {id: user.uid, name: user.displayName, imgURL: user.photoURL},
+            receiver: mentionedList.current,
+            isClicked: false,
+            isRead: false,
+            createdAt: new Date(),
         });
     }
 
