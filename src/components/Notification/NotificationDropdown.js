@@ -17,7 +17,7 @@ function NotificationDropdown({}) {
     const notificationSentByMe = useRef([]);
     const [showDropdown, setShowDropdown] = useState(false);
     const {user} = useAuthContext();
-    const RENOTIFY_TIMEOUT = 60000; // 1 minute for testing
+    const RENOTIFY_TIMEOUT = 30000; // 1 minute for testing
     const {pusher} = useNotificationContext();
     window.pusher = pusher;
 

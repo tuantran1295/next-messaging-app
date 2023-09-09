@@ -42,7 +42,7 @@ function NavBar({user = null}) {
 
     return (
         <header
-            className={`flex-shrink-0 flex items-center justify-between px-4 sm:px-8 shadow-md ${styles.header_space}`}
+            className={`flex-shrink-0 flex items-center justify-between px-4 sm:px-8 shadow-md dark:bg-coolDark-500 dark:shadow-md ${styles.header_space}`}
         >
             <a href=''>
                 <img src={brandLogo} alt='Dreamer_logo' width={150}/>

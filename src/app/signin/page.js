@@ -7,7 +7,7 @@ function Page() {
     return (
         <>
             <NavBar/>
-            <div className="h-screen flex flex-col justify-center items-center py-12 sm:px-6 lg:px-8">
+            <div className="h-screen flex flex-col justify-center items-center py-12 sm:px-6 lg:px-8 dark:bg-coolDark-500">
                 <div className="sm:mx-auto sm:w-full sm:max-w-md">
                     <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
                         Login with your account
