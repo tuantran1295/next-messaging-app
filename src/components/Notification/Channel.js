@@ -82,9 +82,10 @@ function Channel({user = null}) {
             sender: {id: user.uid, name: user.displayName, imgURL: user.photoURL},
             receiver: mentionedList.current,
             isRead: false,
-            isClicked: false
+            isClicked: false,
+            type: 'mentioned'
         }).then(r => {
-            mentionedList.current = []
+            mentionedList.current = [];
         });
     }
 
@@ -104,6 +105,7 @@ function Channel({user = null}) {
             isClicked: false,
             isRead: false,
             createdAt: new Date(),
+            type: 'mentioned'
         });
     }
 

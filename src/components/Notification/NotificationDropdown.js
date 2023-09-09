@@ -4,6 +4,7 @@ import Pusher from 'pusher-js';
 import {toast} from "react-toastify";
 import {getCurrentUserNotification} from "@/firebase/firestore/getData";
 import {useAuthContext} from "@/context/AuthContext";
+import moment from "moment";
 
 const pusher = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY, {
     cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER,
@@ -33,6 +34,36 @@ function NotificationDropdown({}) {
         };
     }, [notifications]);
 
+    const getCurrentUserNotiList = async () => {
+        const {result, error} = await getCurrentUserNotification(user);
+        if (error) {
+            console.log(error);
+            toast.error(JSON.stringify(error), {
+                position: toast.POSITION.TOP_RIGHT
+            });
+            return;
+        }
+
+        // else successful
+        console.log(result);
+        const fixedList = fixCreatedAtTimeStampFormat(result);
+        debugger;
+        if (result && result.length > 0) {
+            setNotifications(fixedList);
+        }
+    }
+
+    const fixCreatedAtTimeStampFormat = (result) => {
+        const notiList = [...result];
+        for (let i = 0; i < result.length; i++) {
+            const createdAt = result[i].createdAt;
+            if (typeof createdAt === 'object') { // firebase timestamp format
+                notiList[i].createdAt =  new Date(createdAt.seconds * 1000 + createdAt.nanoseconds/1000000)
+            }
+        }
+        return notiList;
+    }
+
     const filterOwnerNotification = (data) => {
         console.log(data);
         const receivers = data.receiver;
@@ -48,25 +79,6 @@ function NotificationDropdown({}) {
         toast.info(JSON.stringify(message), {
             position: toast.POSITION.TOP_RIGHT
         });
-    }
-
-    const getCurrentUserNotiList = async () => {
-        const {result, error} = await getCurrentUserNotification(user);
-
-        if (error) {
-            console.log(error);
-            toast.error(JSON.stringify(error), {
-                position: toast.POSITION.TOP_RIGHT
-            });
-            return;
-        }
-
-        // else successful
-        console.log(result);
-
-        if (result && result.length > 0) {
-            setNotifications(result);
-        }
     }
 
     const toggleShowDropdown = () => {
@@ -122,7 +134,7 @@ function NotificationDropdown({}) {
                                      has mentioned you in a message.
                                 </div>
                                 <div className="text-xs font-medium text-primary-700 dark:text-primary-400">
-                                    {/*{notification.createdAt}*/}
+                                    {moment(notification.createdAt).format('hh:mm DD/MM/YYYY')}
                                 </div>
                             </div>
                         </div>
