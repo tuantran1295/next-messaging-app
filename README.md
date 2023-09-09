@@ -55,7 +55,7 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-[![Product Name Screen Shot][product-screenshot]](https://www.linkedin.com/in/tran-quoc-tuan-b338261b3/)
+[![Product Screen Shot][product-screenshot]](https://www.linkedin.com/in/tran-quoc-tuan-b338261b3/)
 
 This project is built for application at Dreamerly company. I want to try some new and trending technologies, they really help to build great quality product in an amazing fast speed despite lacking the support from communities. The application was build in 3 days using Nextjs and Firebase firestore. This can provide very great solutions for a fast-paced
 startup. 
@@ -98,7 +98,6 @@ This is how to list things you need to use the software and how to install them.
 
 ### Getting Started
 
-
 1. Clone the repo, cd to the project directory
    ```sh
    git clone git@github.com:tuantran1295/next-messaging-app.git
@@ -115,6 +114,15 @@ This is how to list things you need to use the software and how to install them.
    ```js
     npm run dev
     ```
+
+## Important note
+
+To show notification, you have to enable it in the system preference or control panel.
+1. Select the main Apple menu, go to System Settings > Notifications.
+
+2. Scroll through the list, locate the Google chrome or some web browser you prefer, select it, and toggle on Allow Notifications.
+[![system setting Screen Shot][setting-screenshot]](https://www.linkedin.com/in/tran-quoc-tuan-b338261b3/)
+
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -157,6 +165,7 @@ Project Link: [git@github.com:tuantran1295/next-messaging-app.git](git@github.co
 
 
 [product-screenshot]: ./public/assets/main-dark.png
+[setting-screenshot]: ./public/assets/Mac-noti-setting.png
 [Next.js]: https://img.shields.io/badge/next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white
 [Next-url]: https://nextjs.org/
 [React.js]: https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB
