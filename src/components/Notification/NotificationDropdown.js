@@ -5,72 +5,48 @@ import {toast} from "react-toastify";
 import {getCurrentUserNotification} from "@/firebase/firestore/getData";
 import {useAuthContext} from "@/context/AuthContext";
 import moment from "moment";
+import editData from "@/firebase/firestore/editData";
+import {useNotificationContext} from "@/context/NotificationContext";
 
-const pusher = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY, {
+const pusherJS = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY, {
     cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER,
 });
 
 function NotificationDropdown({}) {
     const [notifications, setNotifications] = useState([]);
+    const notificationSentByMe = useRef([]);
     const [showDropdown, setShowDropdown] = useState(false);
-    const currentUserNotiList = useRef([]);
-    const { user } = useAuthContext();
+    const {user} = useAuthContext();
+    const RENOTIFY_TIMEOUT = 60000; // 1 minute for testing
+    const {pusher} = useNotificationContext();
+    window.pusher = pusher;
 
     useEffect(() => {
         getCurrentUserNotiList();
     }, [])
 
+    // HANDLE RECEIVE NOTIFICATIONS
     useEffect(() => {
-        const channel = pusher.subscribe(process.env.NEXT_PUBLIC_PUSHER_CHANNEL_NAME);
-
+        const channel = pusherJS.subscribe(process.env.NEXT_PUBLIC_PUSHER_CHANNEL_NAME);
         channel.bind(process.env.NEXT_PUBLIC_PUSHER_EVENT, data => {
-            setNotifications([...notifications, data]);
-
-            filterOwnerNotification(data);
+            filterReceivedNotification(data);
         });
 
         return () => {
-            pusher.unsubscribe(process.env.NEXT_PUBLIC_PUSHER_CHANNEL_NAME);
+            pusherJS.unsubscribe(process.env.NEXT_PUBLIC_PUSHER_CHANNEL_NAME);
         };
-    }, [notifications]);
+    }, []);
 
-    const getCurrentUserNotiList = async () => {
-        const {result, error} = await getCurrentUserNotification(user);
-        if (error) {
-            console.log(error);
-            toast.error(JSON.stringify(error), {
-                position: toast.POSITION.TOP_RIGHT
-            });
-            return;
-        }
-
-        // else successful
-        console.log(result);
-        const fixedList = fixCreatedAtTimeStampFormat(result);
-        debugger;
-        if (result && result.length > 0) {
-            setNotifications(fixedList);
-        }
-    }
-
-    const fixCreatedAtTimeStampFormat = (result) => {
-        const notiList = [...result];
-        for (let i = 0; i < result.length; i++) {
-            const createdAt = result[i].createdAt;
-            if (typeof createdAt === 'object') { // firebase timestamp format
-                notiList[i].createdAt =  new Date(createdAt.seconds * 1000 + createdAt.nanoseconds/1000000)
-            }
-        }
-        return notiList;
-    }
-
-    const filterOwnerNotification = (data) => {
+    const filterReceivedNotification = (data) => {
         console.log(data);
         const receivers = data.receiver;
         for (let i = 0; i < receivers.length; i++) {
             if (user.uid === receivers[i].uid) {
-                setNotifications([...notifications, data]);
+                setNotifications((prevState) => {
+                    return [data, ...prevState];
+                });
                 displayNotificationToast(data.message);
+                return;
             }
         }
     }
@@ -81,11 +57,94 @@ function NotificationDropdown({}) {
         });
     }
 
+    const getCurrentUserNotiList = async () => {
+        const {received, sentByMe, error} = await getCurrentUserNotification(user);
+        if (error) {
+            console.log(error);
+            toast.error(JSON.stringify(error), {
+                position: toast.POSITION.TOP_RIGHT
+            });
+            return;
+        }
+        
+        if (sentByMe && sentByMe.length > 0) {
+            notificationSentByMe.current = sentByMe;
+        }
+        sendRenotifyNotification(sentByMe); // gui notification nhac lai lan 1
+        
+        // else successful
+        console.log(received);
+        const fixedList = fixCreatedAtTimeStampFormat(received);
+        // debugger;
+        if (received && received.length > 0) {
+            setNotifications(fixedList);
+        }
+    }
+
+    const sendRenotifyNotification = async (sentByMe) => {
+        for (let i = 0; i < sentByMe.length; i++) {
+            if (sentByMe[i].reNotified === false && sentByMe[i].isRead === false) {
+                const reNotifyTimeout = setTimeout(async () => {
+                    window.pusher.trigger("chat-channel", "mentioned", {
+                        message: `You have an unread message from ${user.displayName} .`,
+                        sender: {id: user.uid, name: user.displayName, imgURL: user.photoURL},
+                        receiver: sentByMe[i].receiver,
+                        createdAt: new Date(),
+                        type: 'reNotify',
+                    });
+                    const {result, error} = await editData('notification', sentByMe[i].id, {reNotified: true});
+                    if (error) {
+                        console.log(error);
+                        toast.error(JSON.stringify(error), {
+                            position: toast.POSITION.TOP_RIGHT
+                        });
+                    }
+                }, RENOTIFY_TIMEOUT);
+            }
+        }
+    }
+
+    const fixCreatedAtTimeStampFormat = (result) => {
+        const notiList = [...result];
+        for (let i = 0; i < result.length; i++) {
+            const createdAt = result[i].createdAt;
+            if (typeof createdAt === 'object') { // firebase timestamp format
+                notiList[i].createdAt = new Date(createdAt.seconds * 1000 + createdAt.nanoseconds / 1000000)
+            }
+        }
+        return notiList;
+    }
+
     const toggleShowDropdown = () => {
         setShowDropdown((prevState) => {
             return !prevState;
         })
     }
+
+    const setNotificationRead = async (docID) => {
+        const {result, error} = await editData('notification', docID, {isRead: true});
+        if (error) {
+            console.log(error);
+            toast.error(JSON.stringify(error), {
+                position: toast.POSITION.TOP_RIGHT
+            });
+            return;
+        }
+
+        const notiList = [...notifications];
+        for (let i = 0; i < notifications.length; i++) {
+            if (notifications[i].id === docID) {
+                notiList[i].isRead = true;
+                setNotifications(notiList);
+                setShowDropdown(false);
+                return;
+            }
+        }
+        return notiList;
+
+
+    }
+
     return (<>
             {/*Notifications*/}
             <button type="button" onClick={toggleShowDropdown} data-dropdown-toggle="notification-dropdown"
@@ -119,8 +178,8 @@ function NotificationDropdown({}) {
                 </div>
                 <div>
                     {notifications.map((notification, index) => (
-                        <div
-                            className="flex py-3 px-4 border-b hover:bg-gray-100 dark:hover:bg-gray-600 dark:border-gray-600">
+                        <div key={notification.id ? notification.id : index} onClick={() => setNotificationRead(notification.id)}
+                             className="flex py-3 px-4 border-b hover:bg-gray-100 dark:hover:bg-gray-600 dark:border-gray-600">
                             <div className="flex-shrink-0">
                                 <img className="w-11 h-11 rounded-full"
                                      src={notification.sender.imgURL ? notification.sender.imgURL : '/assets/avatar-placeholder.jpg'}
@@ -131,10 +190,15 @@ function NotificationDropdown({}) {
                                 <div className="text-gray-500 font-normal text-sm mb-1.5 dark:text-gray-400">
                                 <span
                                     className="font-semibold text-gray-900 dark:text-white">{notification.sender.name + " "}</span>
-                                     has mentioned you in a message.
+                                    has mentioned you in a message.
                                 </div>
-                                <div className="text-xs font-medium text-primary-700 dark:text-primary-400">
+                                <div className="text-xs font-medium text-blue-700 dark:text-blue-400">
                                     {moment(notification.createdAt).format('hh:mm DD/MM/YYYY')}
+                                    <span className="ml-3 text-black-400 dark:text-white-400">status:
+                                        <span className="ml-1 text-primary-700 dark:text-white-400">
+                                            {notification.isRead ? <span className="text-green-500">Opened</span> : 'Unread'}
+                                        </span>
+                                    </span>
                                 </div>
                             </div>
                         </div>

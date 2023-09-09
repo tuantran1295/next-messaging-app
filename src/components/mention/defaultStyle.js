@@ -22,8 +22,8 @@ export default {
   },
 
   "&singleLine": {
-    display: "inline-block",
-    width: "65vw",
+    display: "flex",
+    width: "100%",
     flex: "1 1 0%",
     outlineStyle: "none",
     marginTop: "0.5rem",

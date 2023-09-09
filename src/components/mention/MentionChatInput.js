@@ -1,5 +1,6 @@
 'use client'
 import {useEffect} from "react";
+import "./mentionStyle.css";
 import {Mention, MentionsInput} from "react-mentions";
 import defaultStyle from "./defaultStyle";
 import defaultMentionStyle from "./defaultMentionStyle";

@@ -83,7 +83,8 @@ function Channel({user = null}) {
             receiver: mentionedList.current,
             isRead: false,
             isClicked: false,
-            type: 'mentioned'
+            type: 'mentioned',
+            reNotified: false
         }).then(r => {
             mentionedList.current = [];
         });
@@ -105,7 +106,8 @@ function Channel({user = null}) {
             isClicked: false,
             isRead: false,
             createdAt: new Date(),
-            type: 'mentioned'
+            type: 'mentioned',
+            reNotified: false
         });
     }
 
@@ -132,7 +134,7 @@ function Channel({user = null}) {
                     <div ref={bottomListRef}/>
                 </div>
             </div>
-            <div className='mb-6 mx-4'>
+            <div className='mb-6'>
                 <form
                     onSubmit={handleOnSubmit}
                     className='flex flex-row bg-gray-200 dark:bg-coolDark-400 rounded-md px-4 py-3 z-10 max-w-screen-lg mx-auto dark:text-white shadow-md'

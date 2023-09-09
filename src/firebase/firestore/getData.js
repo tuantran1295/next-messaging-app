@@ -1,5 +1,5 @@
 import firebase_app from "@/firebase/config";
-import {collection, doc, getDoc, getDocs, getFirestore} from "firebase/firestore";
+import {collection, doc, getDoc, getDocs, getFirestore, query, orderBy} from "firebase/firestore";
 
 const db = getFirestore(firebase_app);
 export async function getDocument(collection, id) {
@@ -58,10 +58,12 @@ function removeDuplicate(array) {
 export async function getCurrentUserNotification(currentUser) {
     let error = null;
     let notiList = [];
-    let result = [];
+    let received = [];
+    let sentByMe = []
     try {
-        const snapshot = await getDocs(collection(db, 'notification'));
-        notiList = snapshot.docs.map(doc => doc.data());
+        const notificationRef = collection(db, 'notification');
+        const snapshot = await getDocs(query(notificationRef, orderBy('createdAt', 'desc')));
+        notiList = snapshot.docs.map(doc => {return {...doc.data(), id: doc.id}});
     }catch (e) {
         error = e
     }
@@ -71,9 +73,14 @@ export async function getCurrentUserNotification(currentUser) {
         if (receivers && receivers.length > 0)
         for (let j = 0; j < receivers.length; j++) {
             if (currentUser.uid === receivers[j].uid) {
-                result.push(notiList[i]);
+                received.push(notiList[i]);
             }
         }
+
+        const sender = notiList[i].sender;
+        if (sender.id === currentUser.uid) {
+            sentByMe.push(notiList[i]);
+        }
     }
-    return { result, error }
+    return { received, sentByMe, error }
 }
