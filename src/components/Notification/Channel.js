@@ -6,10 +6,13 @@ import firebase_app from "../../firebase/config";
 import {Message} from '../index';
 import {getFirestore, collection, query, orderBy, limit, onSnapshot, serverTimestamp, addDoc} from "firebase/firestore";
 import MentionChatInput from "@/components/mention/MentionChatInput";
+import {useNotificationContext} from "@/context/NotificationContext";
 
 function Channel({user = null}) {
     const db = getFirestore(firebase_app);
     const messagesRef = collection(db, 'messages');
+    const notificationRef = collection(db, 'notification');
+    const mentionedList = useRef([]);
     const dbQuery = query(messagesRef, orderBy('createdAt'), limit(100));
 
     const [messages, setMessages] = useState([]);
@@ -19,6 +22,8 @@ function Channel({user = null}) {
     const bottomListRef = useRef(null);
 
     const {uid, displayName, photoURL} = user;
+
+    const {pusher} = useNotificationContext();
 
     useEffect(() => {
         // Subscribe to query with onSnapshot
@@ -45,22 +50,59 @@ function Channel({user = null}) {
 
         const trimmedMessage = newMessage.trim();
         if (db) {
-            // Add new message in Firestore
-            addDoc(messagesRef, {
-                text: trimmedMessage,
-                createdAt: serverTimestamp(),
-                uid,
-                displayName,
-                photoURL,
-            }).then(r => {
-                // console.log(r);
-                // Clear input field
-                setNewMessage('');
-                // Scroll down to the bottom of the list
-                bottomListRef.current?.scrollIntoView({behavior: 'smooth'});
-            });
+            addMessageToDB(trimmedMessage);
+            if (mentionedList.current.length > 0) {
+                addNotificationToDB();
+                triggerNotification();
+            }
         }
     };
+
+    const addMessageToDB = (message) => {
+        // Add new message in Firestore
+        addDoc(messagesRef, {
+            text: message,
+            createdAt: serverTimestamp(),
+            uid,
+            displayName,
+            photoURL,
+        }).then(r => {
+            // console.log(r);
+            // Clear input field
+            setNewMessage('');
+            // Scroll down to the bottom of the list
+            bottomListRef.current?.scrollIntoView({behavior: 'smooth'});
+        });
+    }
+
+    const addNotificationToDB = () => {
+        addDoc(notificationRef, {
+            text: `${displayName} has mentioned you in a message.`,
+            createdAt: serverTimestamp(),
+            sender: {id: user.uid, name: user.displayName, imgURL: user.photoURL},
+            receiver: mentionedList,
+            isRead: false,
+            isClicked: false
+        }).then(r => {
+            mentionedList.current = []
+        });
+    }
+
+    const onUserMentioned = (addedUser) => {
+        mentionedList.current.push(addedUser);
+    }
+
+    const onMentionedRemove = (removedUser) => {
+
+    }
+
+    const triggerNotification = () => {
+        pusher.trigger("chat-channel", "mentioned", {
+            message: `${user.displayName} has mentioned you in a message.`,
+            // sender: {id: user.uid, name: user.displayName, imgURL: user.photoURL},
+            // receiver: mentionedList
+        });
+    }
 
     return (
         <div className='flex flex-col h-full'>
@@ -90,6 +132,12 @@ function Channel({user = null}) {
                     onSubmit={handleOnSubmit}
                     className='flex flex-row bg-gray-200 dark:bg-coolDark-400 rounded-md px-4 py-3 z-10 max-w-screen-lg mx-auto dark:text-white shadow-md'
                 >
+                    <MentionChatInput
+                        value={newMessage}
+                        onChange={handleOnChange}
+                        onUserMentioned={onUserMentioned}
+                        onMentionRemove={onMentionedRemove}
+                    />
                     {/*<input*/}
                     {/*  ref={inputRef}*/}
                     {/*  type='text'*/}
@@ -98,10 +146,6 @@ function Channel({user = null}) {
                     {/*  placeholder='Type your message here...'*/}
                     {/*  className='flex-1 bg-transparent outline-none'*/}
                     {/*/>*/}
-                    <MentionChatInput
-                        value={newMessage}
-                        onChange={handleOnChange}
-                    />
                     <button
                         type='submit'
                         disabled={!newMessage}

@@ -5,10 +5,8 @@ import defaultStyle from "./defaultStyle";
 import defaultMentionStyle from "./defaultMentionStyle";
 import {toast} from "react-toastify";
 import {getAllUser} from "@/firebase/firestore/getData";
-import {useAuthContext} from "@/context/AuthContext";
-import {useNotificationContext} from "@/context/NotificationContext";
 
-var users = [
+var userList = [
     {
         id: "jack",
         display: "Jack",
@@ -19,10 +17,7 @@ var users = [
     },
 ];
 
-const MentionChatInput = ({value, onChange}) => {
-    const {pusher} = useNotificationContext();
-    const {user} = useAuthContext();
-
+const MentionChatInput = ({value, onChange, onUserMentioned, onMentionRemove}) => {
     useEffect(() => {
         fetchAllUsers();
     }, [])
@@ -41,20 +36,24 @@ const MentionChatInput = ({value, onChange}) => {
         // else successful
         console.log(result);
         window.sessionStorage.setItem('allUser', JSON.stringify(result));
-        users = result;
+        userList = result;
         return result;
     };
 
-    const onUserMentioned = (e) => {
+    const onMentionedAdd = (e) => {
         console.log("onUserMentioned", e);
-        const mentionedUser = users.filter(u => u.id === e)[0];
+        const mentionedUser = userList.filter(u => u.id === e)[0];
         console.log(mentionedUser);
-        pusher.trigger("chat-channel", "mentioned", {
-            message: `${user.displayName} has mentioned you in a message.`,
-            sender: {id: user.uid, name: user.displayName},
-            receiver: {id: mentionedUser.uid, name: mentionedUser.displayName}
-        });
-    };
+        onUserMentioned(mentionedUser);
+    }
+
+    const onMentionedRemove = (e) => {
+        console.log("onUserRemoved", e);
+        const removedUser = userList.filter(u => u.id === e)[0];
+        console.log(removedUser);
+        onMentionRemove(removedUser);
+    }
+
     return (
         <div className="single-line">
             <MentionsInput
@@ -65,7 +64,7 @@ const MentionChatInput = ({value, onChange}) => {
                 a11ySuggestionsListLabel={"Suggested mentions"}
                 style={defaultStyle}
             >
-                <Mention data={users} onAdd={onUserMentioned} style={defaultMentionStyle}/>
+                <Mention data={userList} onAdd={onMentionedAdd} onRemove={onMentionedRemove} style={defaultMentionStyle}/>
             </MentionsInput>
         </div>
     );
