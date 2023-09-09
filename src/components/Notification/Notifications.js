@@ -17,9 +17,9 @@ const Notifications = () => {
             setNotifications([...notifications, data]);
             console.log([...notifications, data]);
             const notification = new Notification(JSON.stringify(data));
-            // toast.info(JSON.stringify(data), {
-            //     position: toast.POSITION.TOP_RIGHT
-            // });
+            toast.info(JSON.stringify(data), {
+                position: toast.POSITION.TOP_RIGHT
+            });
         });
 
         return () => {

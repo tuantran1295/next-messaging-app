@@ -53,9 +53,9 @@ function NotificationDropdown({}) {
 
     const displayNotificationToast = (message) => {
         const notification = new Notification(message);
-        // toast.info(JSON.stringify(message), {
-        //     position: toast.POSITION.TOP_RIGHT
-        // });
+        toast.info(JSON.stringify(message), {
+            position: toast.POSITION.TOP_RIGHT
+        });
     }
 
     const getCurrentUserNotiList = async () => {
