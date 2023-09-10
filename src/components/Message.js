@@ -26,7 +26,7 @@ function Message({
   return (
     <div className='px-4 py-4 rounded-md hover:bg-gray-50 dark:hover:bg-coolDark-600 overflow-hidden flex items-start'>
       {photoURL ? (
-        <Image
+        <img
           src={photoURL}
           alt='Avatar'
           className='rounded-full'
