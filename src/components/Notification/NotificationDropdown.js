@@ -2,11 +2,13 @@
 import React, {useState, useEffect, useRef} from 'react';
 import Pusher from 'pusher-js';
 import {toast} from "react-toastify";
-import {getCurrentUserNotification} from "@/firebase/firestore/getData";
+import {
+    deActiveBlockingNotify,
+    getCurrentUserNotification
+} from "@/firebase/firestore/getData";
 import {useAuthContext} from "@/context/AuthContext";
 import moment from "moment";
 import editData from "@/firebase/firestore/editData";
-import {useNotificationContext} from "@/context/NotificationContext";
 
 const pusherJS = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY, {
     cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER,
@@ -17,9 +19,6 @@ function NotificationDropdown({}) {
     const notificationSentByMe = useRef([]);
     const [showDropdown, setShowDropdown] = useState(false);
     const {user} = useAuthContext();
-    const RENOTIFY_TIMEOUT = 30000; // 1 minute for testing
-    const {pusher} = useNotificationContext();
-    window.pusher = pusher;
 
     useEffect(() => {
         getCurrentUserNotiList();
@@ -38,13 +37,14 @@ function NotificationDropdown({}) {
     }, []);
 
     const filterReceivedNotification = (data) => {
-        console.log(data);
         const receivers = data.receiver;
         for (let i = 0; i < receivers.length; i++) {
             if (user.uid === receivers[i].uid) {
-                setNotifications((prevState) => {
-                    return [data, ...prevState];
-                });
+                if (data.type === "mentioned") {
+                    setNotifications((prevState) => {
+                        return [data, ...prevState];
+                    });
+                }
                 displayNotificationToast(data.message);
                 return;
             }
@@ -71,7 +71,6 @@ function NotificationDropdown({}) {
         if (sentByMe && sentByMe.length > 0) {
             notificationSentByMe.current = sentByMe;
         }
-        sendRenotifyNotification(sentByMe); // gui notification nhac lai lan 1
         
         // else successful
         console.log(received);
@@ -82,28 +81,6 @@ function NotificationDropdown({}) {
         }
     }
 
-    const sendRenotifyNotification = async (sentByMe) => {
-        for (let i = 0; i < sentByMe.length; i++) {
-            if (sentByMe[i].reNotified === false && sentByMe[i].isRead === false) {
-                const reNotifyTimeout = setTimeout(async () => {
-                    window.pusher.trigger("chat-channel", "mentioned", {
-                        message: `You have an unread message from ${user.displayName} .`,
-                        sender: {id: user.uid, name: user.displayName, imgURL: user.photoURL},
-                        receiver: sentByMe[i].receiver,
-                        createdAt: new Date(),
-                        type: 'reNotify',
-                    });
-                    const {result, error} = await editData('notification', sentByMe[i].id, {reNotified: true});
-                    if (error) {
-                        console.log(error);
-                        toast.error(JSON.stringify(error), {
-                            position: toast.POSITION.TOP_RIGHT
-                        });
-                    }
-                }, RENOTIFY_TIMEOUT);
-            }
-        }
-    }
 
     const fixCreatedAtTimeStampFormat = (result) => {
         const notiList = [...result];
@@ -122,10 +99,18 @@ function NotificationDropdown({}) {
         })
     }
 
-    const setNotificationRead = async (docID) => {
+    const setNotificationRead = async (notification) => {
+        const docID = notification.id;
         const {result, error} = await editData('notification', docID, {isRead: true});
+        const {deleteResult, deleteError} = await deActiveBlockingNotify(docID); // get blocked receiving notification user from db
         if (error) {
-            console.log(error);
+            console.log(JSON.stringify(error));
+            toast.error(JSON.stringify(error), {
+                position: toast.POSITION.TOP_RIGHT
+            });
+            return;
+        }
+        if (deleteError) {
             toast.error(JSON.stringify(error), {
                 position: toast.POSITION.TOP_RIGHT
             });
@@ -142,8 +127,6 @@ function NotificationDropdown({}) {
             }
         }
         return notiList;
-
-
     }
 
     return (<>
@@ -179,7 +162,7 @@ function NotificationDropdown({}) {
                 </div>
                 <div>
                     {notifications.map((notification, index) => (
-                        <div key={index} onClick={() => setNotificationRead(notification.id)}
+                        <div key={index} onClick={() => setNotificationRead(notification)}
                              className="flex py-3 px-4 border-b hover:bg-gray-100 dark:hover:bg-gray-600 dark:border-gray-600">
                             <div className="flex-shrink-0">
                                 <img className="w-11 h-11 rounded-full"

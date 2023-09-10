@@ -7,11 +7,16 @@ import {Message} from '../index';
 import {getFirestore, collection, query, orderBy, limit, onSnapshot, serverTimestamp, addDoc} from "firebase/firestore";
 import MentionChatInput from "@/components/mention/MentionChatInput";
 import {useNotificationContext} from "@/context/NotificationContext";
+import editData from "@/firebase/firestore/editData";
+import {toast} from "react-toastify";
+import {getBlockingUserByMe} from "@/firebase/firestore/getData";
 
 function Channel({user = null}) {
     const db = getFirestore(firebase_app);
     const messagesRef = collection(db, 'messages');
     const notificationRef = collection(db, 'notification');
+    const notificationBlockRef = collection(db, 'notification-block')
+
     const mentionedList = useRef([]);
     const dbQuery = query(messagesRef, orderBy('createdAt'), limit(100));
 
@@ -24,6 +29,8 @@ function Channel({user = null}) {
     const {uid, displayName, photoURL} = user;
 
     const {pusher} = useNotificationContext();
+    const RENOTIFY_TIMEOUT = 30000; // 1 minute for testing
+    window.pusher = pusher;
 
     useEffect(() => {
         // Subscribe to query with onSnapshot
@@ -45,15 +52,16 @@ function Channel({user = null}) {
         setNewMessage(e.target.value);
     };
 
-    const handleOnSubmit = (e) => {
+    const handleOnSubmit = async (e) => {
         e.preventDefault();
 
         const trimmedMessage = newMessage.trim();
         if (db) {
             addMessageToDB(trimmedMessage);
             if (mentionedList.current.length > 0) {
-                addNotificationToDB();
-                triggerNotification();
+                if (await checkBlockedNotificationUser()) { // if has not recently sent noti, allow, else, block
+                    addNotificationToDB();
+                }
             }
         }
     };
@@ -86,8 +94,68 @@ function Channel({user = null}) {
             type: 'mentioned',
             reNotified: false
         }).then(r => {
+            triggerNotification(r.id)
+            sendRenotifyNotification(r.id)
             mentionedList.current = [];
         });
+    }
+
+    const sendRenotifyNotification = async (docID) => {
+        const mentionedUser = [...mentionedList.current]; // soft copy
+        const reNotifyTimeout = setTimeout(async () => {
+            window.pusher.trigger("chat-channel", "mentioned", {
+                message: `You have an unread message from ${user.displayName} .`,
+                sender: {id: user.uid, name: user.displayName, imgURL: user.photoURL},
+                receiver: mentionedUser,
+                createdAt: new Date(),
+                type: 'reNotify',
+            });
+            const {result, error} = await editData('notification', docID, {reNotified: true});
+            if (error) {
+                console.log(error);
+                toast.error(JSON.stringify(error), {
+                    position: toast.POSITION.TOP_RIGHT
+                });
+            }
+            // inside setTimeout
+            addBlockedUserToDB(mentionedUser, docID); // block the mentioned user from receive notification
+        }, RENOTIFY_TIMEOUT);
+    }
+
+    const addBlockedUserToDB = (mentionedUser, notificationDocID) => {
+        addDoc(notificationBlockRef, {
+            createdAt: new Date(),
+            sender: {id: user.uid, name: user.displayName, imgURL: user.photoURL},
+            receiver: mentionedUser,
+            notificationDocID: notificationDocID,
+            active: true
+        });
+    }
+
+    const checkBlockedNotificationUser = async () => {
+        const {result, error} = await getBlockingUserByMe(user); // get blocked receiving notification user from db
+        if (error) {
+            console.log(error);
+            toast.error(JSON.stringify(error), {
+                position: toast.POSITION.TOP_RIGHT
+            });
+        }
+        if (result) {
+            // console.log(result);
+            const mentionedUser = [...mentionedList.current]; // soft copy
+            for (let i = 0; i < result.length; i++) {
+                const receivers = result[i].receiver;
+                for (let j = 0; j < receivers.length; j++) {
+                    for (let k = 0; k < mentionedUser.length; k++) {
+                        if (mentionedUser[k].uid === receivers[j].uid) {
+                            // debugger;
+                            return false;
+                        }
+                    }
+                }
+            }
+            return true;
+        }
     }
 
     const onUserMentioned = (addedUser) => {
@@ -98,7 +166,7 @@ function Channel({user = null}) {
 
     }
 
-    const triggerNotification = () => {
+    const triggerNotification = (docID) => {
         pusher.trigger("chat-channel", "mentioned", {
             message: `${user.displayName} has mentioned you in a message.`,
             sender: {id: user.uid, name: user.displayName, imgURL: user.photoURL},
@@ -107,7 +175,8 @@ function Channel({user = null}) {
             isRead: false,
             createdAt: new Date(),
             type: 'mentioned',
-            reNotified: false
+            reNotified: false,
+            id: docID,
         });
     }
 

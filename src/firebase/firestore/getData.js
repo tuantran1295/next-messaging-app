@@ -1,5 +1,6 @@
 import firebase_app from "@/firebase/config";
-import {collection, doc, getDoc, getDocs, getFirestore, query, orderBy} from "firebase/firestore";
+import {collection, doc, getDoc, getDocs, getFirestore, query, orderBy, where, deleteDoc} from "firebase/firestore";
+import editData from "@/firebase/firestore/editData";
 
 const db = getFirestore(firebase_app);
 export async function getDocument(collection, id) {
@@ -62,7 +63,7 @@ export async function getCurrentUserNotification(currentUser) {
     let sentByMe = []
     try {
         const notificationRef = collection(db, 'notification');
-        const snapshot = await getDocs(query(notificationRef, orderBy('createdAt', 'desc')));
+        const snapshot = await getDocs(query(notificationRef, [where("type", "==", "mentioned"), orderBy('createdAt', 'desc')]));
         notiList = snapshot.docs.map(doc => {return {...doc.data(), id: doc.id}});
     }catch (e) {
         error = e
@@ -83,4 +84,44 @@ export async function getCurrentUserNotification(currentUser) {
         }
     }
     return { received, sentByMe, error }
+}
+
+export async function getBlockingUserByMe(currentUser) {
+    let error = null;
+    let result = [];
+    let blockList = [];
+    try {
+        const notificationBlockRef = collection(db, 'notification-block');
+        const snapshot = await getDocs(query(notificationBlockRef));
+        blockList = snapshot.docs.map(doc => {return {...doc.data(), id: doc.id}});
+    }catch (e) {
+        error = e
+    }
+
+    for (let i = 0; i < blockList.length; i++) {
+       if (blockList[i].sender.id === currentUser.uid) {
+           result.push(blockList[i]);
+       }
+    }
+    return { result, error }
+}
+
+export async function deActiveBlockingNotify(notifyID) {
+    let error = null;
+    let result = null;
+    try {
+        const notificationBlockRef = collection(db, 'notification-block');
+        const snapshot = await getDocs(query(notificationBlockRef, where("notificationDocID", "==", notifyID)));
+        console.log(`snapshot`);
+        console.log(snapshot);
+        if (snapshot) {
+            snapshot.forEach((doc) => {
+                deleteDoc(doc.ref);
+            });
+        }
+        // result = await editData(notificationBlockRef, snapshot[0].id, {active: false});
+    }catch (e) {
+        error = e
+    }
+    return { result, error }
 }
