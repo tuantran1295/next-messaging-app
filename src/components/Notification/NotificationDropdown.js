@@ -179,7 +179,7 @@ function NotificationDropdown({}) {
                 </div>
                 <div>
                     {notifications.map((notification, index) => (
-                        <div key={notification.id ? notification.id : index} onClick={() => setNotificationRead(notification.id)}
+                        <div key={index} onClick={() => setNotificationRead(notification.id)}
                              className="flex py-3 px-4 border-b hover:bg-gray-100 dark:hover:bg-gray-600 dark:border-gray-600">
                             <div className="flex-shrink-0">
                                 <img className="w-11 h-11 rounded-full"
