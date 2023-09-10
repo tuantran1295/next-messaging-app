@@ -8,10 +8,10 @@ export const NotificationProvider = ({ children }) => {
     const [pusher, setPusher] = useState(null);
     useEffect(() => {
       const pusherInstance = new Pusher({
-      appId: "1666936",
-      key: "7665b4233dfd79c2f2ed",
-      secret: "2d5424f2ad9a8f4d3875",
-      cluster: "ap1",
+      appId: process.env.NEXT_PUBLIC_PUSHER_APP_ID,
+      key: process.env.NEXT_PUBLIC_PUSHER_KEY,
+      secret: process.env.NEXT_PUBLIC_PUSHER_SECRET,
+      cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER,
       useTLS: true,
       auth: {
         headers: {
