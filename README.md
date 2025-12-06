@@ -55,7 +55,7 @@
 
 [![Product Screen Shot][product-screenshot]](https://www.linkedin.com/in/tran-quoc-tuan-b338261b3/)
 
-This project is built for application at Dreamerly company. I want to try some new and trending technologies, they really help to build great quality product in an amazing fast speed despite lacking the support from communities. The application was build in 3 days using Nextjs and Firebase firestore. This can provide very great solutions for a fast-paced
+This project is built for practice coding. I want to try some new and trending technologies, they really help to build great quality product in an amazing fast speed despite lacking the support from communities. The application was build in 3 days using Nextjs and Firebase firestore. This can provide very great solutions for a fast-paced
 startup. 
 
 Here's why:
