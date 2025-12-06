@@ -9,7 +9,7 @@
 <h3 align="center">Dreamer Firechat project</h3>
 
   <p align="center">
-    An awesome chat app for application at Dreamerly
+    An awesome chat app Dreamerly
     <br />
     <a href="https://github.com/tuantran1295?tab=repositories"><strong>Explore my repositories »</strong></a>
     <br />
